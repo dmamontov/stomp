@@ -1,5 +1,5 @@
 {
-    "name": "react/stomp",
+    "name": "dmamontov/stomp",
     "description": "STOMP bindings for React.",
     "keywords": ["stomp", "rabbitmq"],
     "license": "MIT",
