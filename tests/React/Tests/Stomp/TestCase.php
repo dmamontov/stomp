@@ -4,9 +4,13 @@ namespace React\Tests\Stomp;
 
 use PHPUnit\Framework\TestCase as PHPUnitCase;
 use React\Stomp\Protocol\Frame;
-use React\Tests\Stomp\Constraint\FrameIsEqual;
 use React\Tests\Stomp\Constraint\FrameHasHeader;
+use React\Tests\Stomp\Constraint\FrameIsEqual;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class TestCase extends PHPUnitCase
 {
     protected function assertFrameEquals(Frame $expected, Frame $frame)
@@ -29,7 +33,8 @@ class TestCase extends PHPUnitCase
         $callback = $this->createCallableMock();
         $callback
             ->expects($this->once())
-            ->method('__invoke');
+            ->method('__invoke')
+        ;
 
         return $callback;
     }
@@ -39,7 +44,8 @@ class TestCase extends PHPUnitCase
         $callback = $this->createCallableMock();
         $callback
             ->expects($this->never())
-            ->method('__invoke');
+            ->method('__invoke')
+        ;
 
         return $callback;
     }

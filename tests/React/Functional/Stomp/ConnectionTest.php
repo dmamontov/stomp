@@ -2,6 +2,10 @@
 
 namespace React\Functional\Stomp;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ConnectionTest extends FunctionalTestCase
 {
     /** @test */
@@ -21,7 +25,8 @@ class ConnectionTest extends FunctionalTestCase
             }, function (\Exception $e) use ($phpunit, $loop) {
                 $loop->stop();
                 $phpunit->fail('Connection should occur');
-            });
+            })
+        ;
 
         $loop->run();
 
@@ -31,15 +36,15 @@ class ConnectionTest extends FunctionalTestCase
     /** @test */
     public function itShouldFailOnConnect()
     {
-        if (getenv('SKIP_AUTH_CHECKS') === '1') {
+        if ('1' === getenv('SKIP_AUTH_CHECKS')) {
             return;
         }
 
         $loop = $this->getEventLoop();
-        $client = $this->getClient($loop, array(
+        $client = $this->getClient($loop, [
             'login' => 'badidealogin',
-            'passcode' => 'blegh'
-        ));
+            'passcode' => 'blegh',
+        ]);
 
         $phpunit = $this;
         $error = null;
@@ -52,7 +57,8 @@ class ConnectionTest extends FunctionalTestCase
             }, function ($e) use ($loop, &$error) {
                 $error = $e;
                 $loop->stop();
-            });
+            })
+        ;
 
         $loop->run();
 

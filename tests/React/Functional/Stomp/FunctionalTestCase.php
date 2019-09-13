@@ -12,7 +12,7 @@ abstract class FunctionalTestCase extends \PHPUnit_Framework_TestCase
         return LoopFactory::create();
     }
 
-    protected function getClient($loop, array $options = array())
+    protected function getClient($loop, array $options = [])
     {
         $factory = new Factory($loop);
 
@@ -21,7 +21,7 @@ abstract class FunctionalTestCase extends \PHPUnit_Framework_TestCase
         }
 
         $provider = getenv('STOMP_PROVIDER');
-        $configFile = sprintf('%s/%s.php', realpath(__DIR__ . '/../../../../examples/config'), $provider);
+        $configFile = sprintf('%s/%s.php', realpath(__DIR__.'/../../../../examples/config'), $provider);
 
         if (!file_exists($configFile)) {
             throw new \RuntimeException(sprintf('Invalid STOMP_PROVIDER: No config file found at %s', $configFile));

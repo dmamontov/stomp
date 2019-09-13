@@ -7,11 +7,15 @@ use React\Stomp\Client\IncomingPackageProcessor;
 use React\Stomp\Client\State;
 use React\Stomp\Protocol\Frame;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class IncomingPackageProcessorTest extends TestCase
 {
     /**
      * @test
-     * @expectedException React\Stomp\Exception\ServerErrorException
+     * @expectedException \React\Stomp\Exception\ServerErrorException
      * @expectedExceptionMessage whoops
      */
     public function receiveFrameShouldConvertErrorFrameToServerErrorException()
@@ -19,13 +23,13 @@ class IncomingPackageProcessorTest extends TestCase
         $state = new State();
         $packageProcessor = new IncomingPackageProcessor($state);
 
-        $frame = new Frame('ERROR', array('message' => 'whoops'));
+        $frame = new Frame('ERROR', ['message' => 'whoops']);
         $command = $packageProcessor->receiveFrame($frame);
     }
 
     /**
      * @test
-     * @expectedException React\Stomp\Exception\InvalidFrameException
+     * @expectedException \React\Stomp\Exception\InvalidFrameException
      * @expectedExceptionMessage Received frame with command 'FOO', expected 'CONNECTED'.
      */
     public function nonConnectedFrameAfterConnectingShouldResultInError()
@@ -44,7 +48,7 @@ class IncomingPackageProcessorTest extends TestCase
         $state = new State();
         $packageProcessor = new IncomingPackageProcessor($state);
 
-        $frame = new Frame('MESSAGE', array('message' => 'whoops'));
+        $frame = new Frame('MESSAGE', ['message' => 'whoops']);
         $command = $packageProcessor->receiveFrame($frame);
 
         $this->assertInstanceOf('React\Stomp\Client\Command\NullCommand', $command);

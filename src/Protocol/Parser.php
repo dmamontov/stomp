@@ -4,11 +4,11 @@ namespace React\Stomp\Protocol;
 
 class Parser
 {
-    public $allowedBodyCommands = array('SEND', 'MESSAGE', 'ERROR');
+    public $allowedBodyCommands = ['SEND', 'MESSAGE', 'ERROR'];
 
     public function parse($data)
     {
-        $frames = array();
+        $frames = [];
 
         while ($this->hasFullFrame($data)) {
             list($frameData, $data) = $this->extractFrameData($data);
@@ -16,7 +16,7 @@ class Parser
             $frames[] = $frame;
         }
 
-        return array($frames, $data);
+        return [$frames, $data];
     }
 
     public function hasFullFrame($data)
@@ -45,8 +45,8 @@ class Parser
             }
 
             list($name, $value) = explode(':', $line, 2);
-            $name   = $this->unescapeHeaderValue($name);
-            $value  = $this->unescapeHeaderValue($value);
+            $name = $this->unescapeHeaderValue($name);
+            $value = $this->unescapeHeaderValue($value);
 
             if (isset($frame->headers[$name])) {
                 continue;
@@ -71,10 +71,10 @@ class Parser
 
     public function unescapeHeaderValue($value)
     {
-        return strtr($value, array(
+        return strtr($value, [
             '\\n' => "\n",
             '\\c' => ':',
-            '\\\\'  => '\\',
-        ));
+            '\\\\' => '\\',
+        ]);
     }
 }

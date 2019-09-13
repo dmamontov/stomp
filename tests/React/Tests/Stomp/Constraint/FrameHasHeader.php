@@ -2,8 +2,8 @@
 
 namespace React\Tests\Stomp\Constraint;
 
-use React\Stomp\Protocol\Frame;
 use PHPUnit_Framework_Constraint as Constraint;
+use React\Stomp\Protocol\Frame;
 
 class FrameHasHeader extends Constraint
 {
@@ -14,6 +14,15 @@ class FrameHasHeader extends Constraint
     {
         $this->name = $name;
         $this->value = $value;
+    }
+
+    public function toString()
+    {
+        return sprintf(
+            'has header %s with value %s',
+            $this->name,
+            json_encode($this->value)
+        );
     }
 
     protected function matches($other)
@@ -30,25 +39,13 @@ class FrameHasHeader extends Constraint
         if (!$this->isFrame($other)) {
             return sprintf(
                 '%s is a STOMP frame',
-
                 json_encode($other)
             );
         }
 
         return sprintf(
             '%s has header %s with value %s',
-
             json_encode($other),
-            $this->name,
-            json_encode($this->value)
-        );
-    }
-
-    public function toString()
-    {
-        return sprintf(
-            'has header %s with value %s',
-
             $this->name,
             json_encode($this->value)
         );

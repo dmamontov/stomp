@@ -3,21 +3,21 @@
 namespace React\Stomp;
 
 use Evenement\EventEmitter;
+use React\EventLoop\LoopInterface;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use React\Stomp\Client\Command\CloseCommand;
+use React\Stomp\Client\Command\CommandInterface;
+use React\Stomp\Client\Command\ConnectionEstablishedCommand;
+use React\Stomp\Client\Command\NullCommand;
 use React\Stomp\Client\IncomingPackageProcessor;
 use React\Stomp\Client\OutgoingPackageCreator;
 use React\Stomp\Client\State;
-use React\Stomp\Client\Command\CommandInterface;
-use React\Stomp\Client\Command\CloseCommand;
-use React\Stomp\Client\Command\ConnectionEstablishedCommand;
-use React\Stomp\Client\Command\NullCommand;
-use React\Stomp\Exception\ProcessingException;
 use React\Stomp\Exception\ConnectionException;
+use React\Stomp\Exception\ProcessingException;
 use React\Stomp\Io\InputStreamInterface;
 use React\Stomp\Io\OutputStreamInterface;
 use React\Stomp\Protocol\Frame;
-use React\EventLoop\LoopInterface;
 
 /**
  * @event connect
@@ -29,9 +29,9 @@ class Client extends EventEmitter
     private $connectionStatus = 'not-connected';
     private $packageProcessor;
     private $packageCreator;
-    private $subscriptions = array();
-    private $acknowledgements = array();
-    private $options = array();
+    private $subscriptions = [];
+    private $acknowledgements = [];
+    private $options = [];
 
     /** @var Deferred */
     private $connectDeferred;
@@ -47,9 +47,9 @@ class Client extends EventEmitter
         $this->packageCreator = new OutgoingPackageCreator($state);
 
         $this->input = $input;
-        $this->input->on('frame', array($this, 'handleFrameEvent'));
-        $this->input->on('error', array($this, 'handleErrorEvent'));
-        $this->input->on('close', array($this, 'handleCloseEvent'));
+        $this->input->on('frame', [$this, 'handleFrameEvent']);
+        $this->input->on('error', [$this, 'handleErrorEvent']);
+        $this->input->on('close', [$this, 'handleCloseEvent']);
         $this->output = $output;
 
         $this->options = $this->sanatizeOptions($options);
@@ -73,7 +73,7 @@ class Client extends EventEmitter
         });
 
         $this->on('connect', function ($client) use ($timer, $deferred) {
-            $timer->cancel();
+            $this->loop->cancelTimer($timer);
             $deferred->resolve($client);
         });
 
@@ -86,58 +86,46 @@ class Client extends EventEmitter
 
         return $this->connectPromise = $deferred->promise()->then(function () use ($client) {
             $client->setConnectionStatus('connected');
+
             return $client;
         });
     }
 
-    public function send($destination, $body, array $headers = array())
+    public function send($destination, $body, array $headers = [])
     {
         $frame = $this->packageCreator->send($destination, $body, $headers);
         $this->output->sendFrame($frame);
     }
 
-    public function subscribe($destination, $callback, array $headers = array())
+    public function subscribe($destination, $callback, array $headers = [])
     {
         return $this->doSubscription($destination, $callback, 'auto', $headers);
     }
 
-    public function subscribeWithAck($destination, $ack, $callback, array $headers = array())
+    public function subscribeWithAck($destination, $ack, $callback, array $headers = [])
     {
         if ('auto' === $ack) {
             throw new \LogicException("ack 'auto' is not compatible with acknowledgeable subscription");
         }
+
         return $this->doSubscription($destination, $callback, $ack, $headers);
     }
 
-    private function doSubscription($destination, $callback, $ack, array $headers)
-    {
-        $frame = $this->packageCreator->subscribe($destination, $ack, $headers);
-        $this->output->sendFrame($frame);
-
-        $subscriptionId = $frame->getHeader('id');
-
-        $this->acknowledgements[$subscriptionId] = $ack;
-        $this->subscriptions[$subscriptionId] = $callback;
-
-        return $subscriptionId;
-    }
-
-    public function unsubscribe($subscriptionId, array $headers = array())
+    public function unsubscribe($subscriptionId, array $headers = [])
     {
         $frame = $this->packageCreator->unsubscribe($subscriptionId, $headers);
         $this->output->sendFrame($frame);
 
-        unset($this->acknowledgements[$subscriptionId]);
-        unset($this->subscriptions[$subscriptionId]);
+        unset($this->acknowledgements[$subscriptionId], $this->subscriptions[$subscriptionId]);
     }
 
-    public function ack($subscriptionId, $messageId, array $headers = array())
+    public function ack($subscriptionId, $messageId, array $headers = [])
     {
         $frame = $this->packageCreator->ack($subscriptionId, $messageId, $headers);
         $this->output->sendFrame($frame);
     }
 
-    public function nack($subscriptionId, $messageId, array $headers = array())
+    public function nack($subscriptionId, $messageId, array $headers = [])
     {
         $frame = $this->packageCreator->nack($subscriptionId, $messageId, $headers);
         $this->output->sendFrame($frame);
@@ -165,9 +153,9 @@ class Client extends EventEmitter
         try {
             $this->processFrame($frame);
         } catch (ProcessingException $e) {
-            $this->emit('error', array($e));
+            $this->emit('error', [$e]);
 
-            if ($this->connectionStatus === 'connecting') {
+            if ('connecting' === $this->connectionStatus) {
                 $this->connectDeferred->reject($e);
                 $this->connectDeferred = null;
                 $this->connectPromise = null;
@@ -178,7 +166,7 @@ class Client extends EventEmitter
 
     public function handleErrorEvent(\Exception $e)
     {
-        $this->emit('error', array($e));
+        $this->emit('error', [$e]);
     }
 
     public function handleCloseEvent()
@@ -197,6 +185,7 @@ class Client extends EventEmitter
 
         if ('MESSAGE' === $frame->command) {
             $this->notifySubscribers($frame);
+
             return;
         }
     }
@@ -205,11 +194,13 @@ class Client extends EventEmitter
     {
         if ($command instanceof CloseCommand) {
             $this->output->close();
+
             return;
         }
 
         if ($command instanceof ConnectionEstablishedCommand) {
-            $this->emit('connect', array($this));
+            $this->emit('connect', [$this]);
+
             return;
         }
 
@@ -232,30 +223,17 @@ class Client extends EventEmitter
 
         if ('auto' !== $this->acknowledgements[$subscriptionId]) {
             $resolver = new AckResolver($this, $subscriptionId, $frame->getHeader('message-id'));
-            $parameters = array($frame, $resolver);
+            $parameters = [$frame, $resolver];
         } else {
-            $parameters = array($frame);
+            $parameters = [$frame];
         }
 
         call_user_func_array($callback, $parameters);
     }
 
-    private function sanatizeOptions($options)
-    {
-        if (!isset($options['host']) && !isset($options['vhost'])) {
-            throw new \InvalidArgumentException('Either host or vhost options must be provided.');
-        }
-
-        return array_merge(array(
-            'vhost'     => isset($options['host']) ? $options['host'] : null,
-            'login'     => null,
-            'passcode'  => null,
-        ), $options);
-    }
-
     public function isConnected()
     {
-        return $this->connectionStatus === 'connected';
+        return 'connected' === $this->connectionStatus;
     }
 
     public function setConnectionStatus($status)
@@ -268,4 +246,29 @@ class Client extends EventEmitter
         return mt_rand();
     }
 
+    private function doSubscription($destination, $callback, $ack, array $headers)
+    {
+        $frame = $this->packageCreator->subscribe($destination, $ack, $headers);
+        $this->output->sendFrame($frame);
+
+        $subscriptionId = $frame->getHeader('id');
+
+        $this->acknowledgements[$subscriptionId] = $ack;
+        $this->subscriptions[$subscriptionId] = $callback;
+
+        return $subscriptionId;
+    }
+
+    private function sanatizeOptions($options)
+    {
+        if (!isset($options['host']) && !isset($options['vhost'])) {
+            throw new \InvalidArgumentException('Either host or vhost options must be provided.');
+        }
+
+        return array_merge([
+            'vhost' => isset($options['host']) ? $options['host'] : null,
+            'login' => null,
+            'passcode' => null,
+        ], $options);
+    }
 }

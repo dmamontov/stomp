@@ -5,9 +5,11 @@ namespace React\Tests\Stomp;
 use React\Stomp\Io\InputStream;
 use React\Stomp\Protocol\Frame;
 use React\Stomp\Protocol\Parser;
-use React\Tests\Stomp\Constraint\FrameIsEqual;
-use React\Tests\Stomp\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class InputStreamTest extends TestCase
 {
     /** @test */
@@ -34,7 +36,8 @@ class InputStreamTest extends TestCase
         $callback
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->frameIsEqual(new Frame('CONNECTED')));
+            ->with($this->frameIsEqual(new Frame('CONNECTED')))
+        ;
 
         $input = new InputStream(new Parser());
         $input->on('frame', $callback);
@@ -49,11 +52,13 @@ class InputStreamTest extends TestCase
         $callback
             ->expects($this->at(0))
             ->method('__invoke')
-            ->with($this->frameIsEqual(new Frame('CONNECTED')));
+            ->with($this->frameIsEqual(new Frame('CONNECTED')))
+        ;
         $callback
             ->expects($this->at(1))
             ->method('__invoke')
-            ->with($this->frameIsEqual(new Frame('MESSAGE', array(), 'Body')));
+            ->with($this->frameIsEqual(new Frame('MESSAGE', [], 'Body')))
+        ;
 
         $input = new InputStream(new Parser());
         $input->on('frame', $callback);
@@ -62,7 +67,7 @@ class InputStreamTest extends TestCase
         $input->write("\x00");
         $input->write("MESSAGE\n\n");
         $input->write("Body\x00");
-        $input->write("MESSAGE");
+        $input->write('MESSAGE');
     }
 
     /** @test */
@@ -72,7 +77,8 @@ class InputStreamTest extends TestCase
         $callback
             ->expects($this->at(0))
             ->method('__invoke')
-            ->with($this->frameIsEqual(new Frame('CONNECTED')));
+            ->with($this->frameIsEqual(new Frame('CONNECTED')))
+        ;
 
         $input = new InputStream(new Parser());
         $input->on('frame', $callback);

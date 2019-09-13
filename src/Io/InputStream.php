@@ -3,7 +3,6 @@
 namespace React\Stomp\Io;
 
 use React\Stomp\Protocol\Parser;
-use React\Stream\WritableStream;
 
 // $parser = new Parser();
 // $input = new InputStream($parser);
@@ -29,7 +28,7 @@ class InputStream extends WritableStream implements InputStreamInterface
         $this->buffer = $data;
 
         foreach ($frames as $frame) {
-            $this->emit('frame', array($frame));
+            $this->emit('frame', [$frame]);
         }
     }
 }

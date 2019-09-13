@@ -2,8 +2,6 @@
 
 namespace React\Stomp;
 
-use React\Stomp\Client;
-
 class AckResolver
 {
     private $result;
@@ -19,7 +17,7 @@ class AckResolver
         $this->messageId = $messageId;
     }
 
-    public function ack(array $headers = array())
+    public function ack(array $headers = [])
     {
         $this->throwExceptionIfResolved();
 
@@ -27,7 +25,7 @@ class AckResolver
         $this->client->ack($this->subscriptionId, $this->messageId, $headers);
     }
 
-    public function nack(array $headers = array())
+    public function nack(array $headers = [])
     {
         $this->throwExceptionIfResolved();
 

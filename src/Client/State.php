@@ -33,9 +33,9 @@ class State
 
     public function doneConnecting($session, $server)
     {
-        $this->status   = self::STATUS_CONNECTED;
-        $this->session  = $session;
-        $this->server   = $server;
+        $this->status = self::STATUS_CONNECTED;
+        $this->session = $session;
+        $this->server = $server;
     }
 
     public function startDisconnecting($receipt)

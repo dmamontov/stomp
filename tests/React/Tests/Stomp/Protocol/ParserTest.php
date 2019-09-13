@@ -3,9 +3,13 @@
 namespace React\Tests\Stomp\Protocol;
 
 use PHPUnit\Framework\TestCase;
-use React\Stomp\Protocol\Parser;
 use React\Stomp\Protocol\InvalidFrameException;
+use React\Stomp\Protocol\Parser;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class ParserTest extends TestCase
 {
     /** @test */
@@ -22,7 +26,7 @@ Body\x00";
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('header1' => 'value1', 'header2' => 'value2'),
+            ['header1' => 'value1', 'header2' => 'value2'],
             'Body',
             $data,
             $frames
@@ -49,7 +53,7 @@ Body\x00";
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('header1' => 'value1', 'header2' => 'value2'),
+            ['header1' => 'value1', 'header2' => 'value2'],
             'Body',
             $data,
             $frames
@@ -69,7 +73,7 @@ Body\x00";
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('äöü' => '~'),
+            ['äöü' => '~'],
             '',
             $data,
             $frames
@@ -90,7 +94,7 @@ bazin\\nga:bar\\c\\\\
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('foo' => "bar\nbaz", "bazin\nga" => 'bar:\\'),
+            ['foo' => "bar\nbaz", "bazin\nga" => 'bar:\\'],
             '',
             $data,
             $frames
@@ -98,10 +102,10 @@ bazin\\nga:bar\\c\\\\
     }
 
     /**
-    * @test
-    * @expectedException React\Stomp\Protocol\InvalidFrameException
-    * @expectedExceptionMessage Provided header 'foo:bar\r' contains undefined escape sequences.
-    */
+     * @test
+     * @expectedException \React\Stomp\Protocol\InvalidFrameException
+     * @expectedExceptionMessage Provided header 'foo:bar\r' contains undefined escape sequences.
+     */
     public function itShouldRejectUndefinedEscapeSequences()
     {
         $data = "MESSAGE
@@ -114,9 +118,12 @@ foo:bar\\r
     }
 
     /**
-    * @test
-    * @dataProvider provideFramesThatCanHaveABody
-    */
+     * @test
+     * @dataProvider provideFramesThatCanHaveABody
+     *
+     * @param mixed $body
+     * @param mixed $data
+     */
     public function itShouldAllowCertainFramesToHaveABody($body, $data)
     {
         $parser = new Parser();
@@ -127,20 +134,22 @@ foo:bar\\r
 
     public function provideFramesThatCanHaveABody()
     {
-        return array(
-            array('Body', "SEND\nfoo:bar\n\nBody\x00"),
-            array('Body', "MESSAGE\nfoo:bar\n\nBody\x00"),
-            array('Body', "ERROR\nfoo:bar\n\nBody\x00"),
-        );
+        return [
+            ['Body', "SEND\nfoo:bar\n\nBody\x00"],
+            ['Body', "MESSAGE\nfoo:bar\n\nBody\x00"],
+            ['Body', "ERROR\nfoo:bar\n\nBody\x00"],
+        ];
     }
 
     /**
-    * @test
-    * @dataProvider provideFrameCommandsThatMustNotHaveABody
-    */
+     * @test
+     * @dataProvider provideFrameCommandsThatMustNotHaveABody
+     *
+     * @param mixed $command
+     */
     public function itShouldRejectOtherFramesWithBody($command)
     {
-        $data = "$command\nfoo:bar\n\nBody\x00";
+        $data = "{$command}\nfoo:bar\n\nBody\x00";
 
         $parser = new Parser();
 
@@ -154,12 +163,14 @@ foo:bar\\r
     }
 
     /**
-    * @test
-    * @dataProvider provideFrameCommandsThatMustNotHaveABody
-    */
+     * @test
+     * @dataProvider provideFrameCommandsThatMustNotHaveABody
+     *
+     * @param mixed $command
+     */
     public function itShouldAcceptOtherFramesWithoutBody($command)
     {
-        $data = "$command\nfoo:bar\n\n\x00";
+        $data = "{$command}\nfoo:bar\n\n\x00";
 
         $parser = new Parser();
         $parser->parse($data);
@@ -167,13 +178,13 @@ foo:bar\\r
 
     public function provideFrameCommandsThatMustNotHaveABody()
     {
-        return array(
-            array('CONNECT'),
-            array('CONNECTED'),
-            array('BEGIN'),
-            array('DISCONNECT'),
-            array('FOOBAR'),
-        );
+        return [
+            ['CONNECT'],
+            ['CONNECTED'],
+            ['BEGIN'],
+            ['DISCONNECT'],
+            ['FOOBAR'],
+        ];
     }
 
     /** @test */
@@ -187,7 +198,7 @@ foo:bar\\r
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('foo   ' => '   bar baz   '),
+            ['foo   ' => '   bar baz   '],
             '',
             $data,
             $frames
@@ -209,7 +220,7 @@ foo:baz
 
         $this->assertHasSingleFrame(
             'MESSAGE',
-            array('foo' => 'bar'),
+            ['foo' => 'bar'],
             '',
             $data,
             $frames

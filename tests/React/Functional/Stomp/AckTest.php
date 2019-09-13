@@ -4,6 +4,10 @@ namespace React\Functional\Stomp;
 
 use React\Promise;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class AckTest extends FunctionalTestCase
 {
     /** @test */
@@ -16,10 +20,10 @@ class AckTest extends FunctionalTestCase
 
         $counter = 0;
 
-        Promise\all(array(
+        Promise\all([
             $client1->connect(1),
             $client2->connect(1),
-        ))->then(
+        ])->then(
             function () use ($client1, $client2, $loop, &$counter, $phpunit) {
                 $callback = function ($frame, $resolver) use ($loop, &$counter) {
                     if (0 === $counter) {
@@ -28,16 +32,15 @@ class AckTest extends FunctionalTestCase
                         $resolver->ack();
                         $loop->stop();
                     }
-                    $counter++;
+                    ++$counter;
                 };
 
                 $client1->subscribeWithAck('/topic/foo', 'client-individual', $callback);
                 $client2->subscribeWithAck('/topic/foo', 'client-individual', $callback);
-                # Give some space to actually subscribe server side
+                // Give some space to actually subscribe server side
                 $loop->addTimer(5, function () use ($loop, $client1) {
                     $client1->send('/topic/foo', 'le message à la papa');
                 });
-
 
                 $loop->addTimer(10, function () use ($loop, $phpunit) {
                     $loop->stop();

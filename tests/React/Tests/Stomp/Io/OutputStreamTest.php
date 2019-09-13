@@ -4,9 +4,11 @@ namespace React\Tests\Stomp;
 
 use React\Stomp\Io\OutputStream;
 use React\Stomp\Protocol\Frame;
-use React\Tests\Stomp\Constraint\FrameIsEqual;
-use React\Tests\Stomp\TestCase;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class OutputStreamTest extends TestCase
 {
     public function setUp()
@@ -17,7 +19,8 @@ class OutputStreamTest extends TestCase
             ->method('addTimer')
             ->will($this->returnCallback(function ($seconds, $callback) {
                 call_user_func($callback);
-            }));
+            }))
+        ;
     }
 
     /** @test */
@@ -37,7 +40,8 @@ class OutputStreamTest extends TestCase
         $callback
             ->expects($this->once())
             ->method('__invoke')
-            ->with($this->frameIsEqual($frame));
+            ->with($this->frameIsEqual($frame))
+        ;
 
         $output = new OutputStream($this->loop);
         $output->on('data', $callback);

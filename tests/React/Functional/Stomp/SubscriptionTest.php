@@ -2,6 +2,10 @@
 
 namespace React\Functional\Stomp;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class SubscriptionTest extends FunctionalTestCase
 {
     /** @test */
@@ -23,7 +27,8 @@ class SubscriptionTest extends FunctionalTestCase
                 });
 
                 $client->send('/topic/foo', 'le message à la papa');
-            });
+            })
+        ;
 
         $loop->run();
         $this->assertTrue($received);

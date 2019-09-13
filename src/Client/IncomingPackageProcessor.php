@@ -2,12 +2,12 @@
 
 namespace React\Stomp\Client;
 
-use React\Stomp\Protocol\Frame;
 use React\Stomp\Client\Command\CloseCommand;
 use React\Stomp\Client\Command\ConnectionEstablishedCommand;
 use React\Stomp\Client\Command\NullCommand;
-use React\Stomp\Exception\ServerErrorException;
 use React\Stomp\Exception\InvalidFrameException;
+use React\Stomp\Exception\ServerErrorException;
+use React\Stomp\Protocol\Frame;
 
 class IncomingPackageProcessor
 {
@@ -19,9 +19,9 @@ class IncomingPackageProcessor
     }
 
     /**
-     * Feed frame from the server
+     * Feed frame from the server.
      *
-     * @return An array of commands to be executed by the caller.
+     * @return An array of commands to be executed by the caller
      */
     public function receiveFrame(Frame $frame)
     {

@@ -5,14 +5,19 @@ namespace React\Stomp\Protocol;
 class Frame
 {
     public $command;
-    public $headers = array();
+    public $headers = [];
     public $body;
 
-    public function __construct($command = null, array $headers = array(), $body = '')
+    public function __construct($command = null, array $headers = [], $body = '')
     {
         $this->command = $command;
         $this->headers = $headers;
         $this->body = $body;
+    }
+
+    public function __toString()
+    {
+        return $this->dump();
     }
 
     public function getHeader($name)
@@ -33,10 +38,10 @@ class Frame
         $dumped = '';
 
         foreach ($this->headers as $name => $value) {
-            $name   = $this->escapeHeaderValue($name);
-            $value  = $this->escapeHeaderValue($value);
+            $name = $this->escapeHeaderValue($name);
+            $value = $this->escapeHeaderValue($value);
 
-            $dumped .= "$name:$value\n";
+            $dumped .= "{$name}:{$value}\n";
         }
 
         return $dumped;
@@ -44,15 +49,10 @@ class Frame
 
     private function escapeHeaderValue($value)
     {
-        return strtr($value, array(
-            "\n"    => '\n',
-            ':'     => '\c',
-            '\\'    => '\\\\',
-        ));
-    }
-
-    public function __toString()
-    {
-        return $this->dump();
+        return strtr($value, [
+            "\n" => '\n',
+            ':' => '\c',
+            '\\' => '\\\\',
+        ]);
     }
 }

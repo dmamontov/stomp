@@ -6,14 +6,17 @@ use PHPUnit\Framework\TestCase;
 use React\Stomp\Client\OutgoingPackageCreator;
 use React\Stomp\Client\State;
 use React\Stomp\Protocol\Frame;
-use React\Tests\Stomp\Constraint\FrameEquals;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class OutgoingPackageCreatorTest extends TestCase
 {
     /** @test */
     public function connectShouldEmitConnectFrame()
     {
-        $expectedFrame = new Frame('CONNECT', array('accept-version' => '1.1', 'host' => 'stomp.github.org'));
+        $expectedFrame = new Frame('CONNECT', ['accept-version' => '1.1', 'host' => 'stomp.github.org']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -29,7 +32,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function connectShouldSetLoginAndPasscodeHeadersIfGiven()
     {
-        $expectedFrame = new Frame('CONNECT', array('accept-version' => '1.1', 'host' => 'stomp.github.org', 'login' => 'foo', 'passcode' => 'bar'));
+        $expectedFrame = new Frame('CONNECT', ['accept-version' => '1.1', 'host' => 'stomp.github.org', 'login' => 'foo', 'passcode' => 'bar']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -42,7 +45,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function sendShouldEmitSendFrame()
     {
-        $expectedFrame = new Frame('SEND', array('destination' => '/queue/a', 'content-length' => '13', 'content-type' => 'text/plain'), 'hello queue a');
+        $expectedFrame = new Frame('SEND', ['destination' => '/queue/a', 'content-length' => '13', 'content-type' => 'text/plain'], 'hello queue a');
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -55,7 +58,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function subscribeShouldEmitSubscribeFrame()
     {
-        $expectedFrame = new Frame('SUBSCRIBE', array('id' => 0, 'destination' => '/queue/a', 'ack' => 'auto'));
+        $expectedFrame = new Frame('SUBSCRIBE', ['id' => 0, 'destination' => '/queue/a', 'ack' => 'auto']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -71,11 +74,11 @@ class OutgoingPackageCreatorTest extends TestCase
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
 
-        $expectedFrame = new Frame('SUBSCRIBE', array('id' => 0, 'destination' => '/queue/a', 'ack' => 'auto'));
+        $expectedFrame = new Frame('SUBSCRIBE', ['id' => 0, 'destination' => '/queue/a', 'ack' => 'auto']);
         $frame = $packageCreator->subscribe('/queue/a');
         $this->assertFrameEquals($expectedFrame, $frame);
 
-        $expectedFrame = new Frame('SUBSCRIBE', array('id' => 1, 'destination' => '/queue/a', 'ack' => 'auto'));
+        $expectedFrame = new Frame('SUBSCRIBE', ['id' => 1, 'destination' => '/queue/a', 'ack' => 'auto']);
         $frame = $packageCreator->subscribe('/queue/a');
         $this->assertFrameEquals($expectedFrame, $frame);
     }
@@ -83,7 +86,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function unsubscribeShouldEmitUnsubscribeFrame()
     {
-        $expectedFrame = new Frame('UNSUBSCRIBE', array('id' => 0));
+        $expectedFrame = new Frame('UNSUBSCRIBE', ['id' => 0]);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -96,7 +99,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function ackShouldEmitAckFrame()
     {
-        $expectedFrame = new Frame('ACK', array('subscription' => 0, 'message-id' => 5));
+        $expectedFrame = new Frame('ACK', ['subscription' => 0, 'message-id' => 5]);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -109,7 +112,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function nackShouldEmitNackFrame()
     {
-        $expectedFrame = new Frame('NACK', array('subscription' => 0, 'message-id' => 5));
+        $expectedFrame = new Frame('NACK', ['subscription' => 0, 'message-id' => 5]);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -122,7 +125,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function beginShouldEmitBeginFrame()
     {
-        $expectedFrame = new Frame('BEGIN', array('transaction' => 'tx1'));
+        $expectedFrame = new Frame('BEGIN', ['transaction' => 'tx1']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -135,7 +138,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function commitShouldEmitCommitFrame()
     {
-        $expectedFrame = new Frame('COMMIT', array('transaction' => 'tx1'));
+        $expectedFrame = new Frame('COMMIT', ['transaction' => 'tx1']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -148,7 +151,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function abortShouldEmitAbortFrame()
     {
-        $expectedFrame = new Frame('ABORT', array('transaction' => 'tx1'));
+        $expectedFrame = new Frame('ABORT', ['transaction' => 'tx1']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);
@@ -161,7 +164,7 @@ class OutgoingPackageCreatorTest extends TestCase
     /** @test */
     public function disconnectShouldEmitDisconnectFrame()
     {
-        $expectedFrame = new Frame('DISCONNECT', array('receipt' => 'foo'));
+        $expectedFrame = new Frame('DISCONNECT', ['receipt' => 'foo']);
 
         $state = new State();
         $packageCreator = new OutgoingPackageCreator($state);

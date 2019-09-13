@@ -4,18 +4,26 @@ namespace React\Tests\Stomp;
 
 use React\Stomp\AckResolver;
 
+/**
+ * @internal
+ * @coversNothing
+ */
 class AckResolverTest extends TestCase
 {
     /**
      * @test
      * @dataProvider provideAckNackCombinaisons
      * @expectedException \RuntimeException
+     *
+     * @param mixed $first
+     * @param mixed $second
      */
     public function doubleAckIsForbidden($first, $second)
     {
         $client = $this->getMockBuilder('React\Stomp\Client')
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         $ackResolver = new AckResolver($client, 12345, 54321);
 
@@ -25,12 +33,12 @@ class AckResolverTest extends TestCase
 
     public function provideAckNackCombinaisons()
     {
-        return array(
-            array('ack', 'ack'),
-            array('nack', 'nack'),
-            array('ack', 'nack'),
-            array('nack', 'ack'),
-        );
+        return [
+            ['ack', 'ack'],
+            ['nack', 'nack'],
+            ['ack', 'nack'],
+            ['nack', 'ack'],
+        ];
     }
 
     /** @test */
@@ -38,24 +46,25 @@ class AckResolverTest extends TestCase
     {
         $client = $this->getMockBuilder('React\Stomp\Client')
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         $capturedSubId = $capturedMsgId = $capturedHeaders = null;
 
         $client
             ->expects($this->exactly(1))
             ->method('ack')
-            ->will($this->returnCallback(function ($subId, $msgId, $headers)
-                    use (&$capturedSubId, &$capturedMsgId, &$capturedHeaders) {
+            ->will($this->returnCallback(function ($subId, $msgId, $headers) use (&$capturedSubId, &$capturedMsgId, &$capturedHeaders) {
                 $capturedHeaders = $headers;
                 $capturedMsgId = $msgId;
                 $capturedSubId = $subId;
-            }));
+            }))
+        ;
 
         $ackResolver = new AckResolver($client, 12345, 54321);
-        $ackResolver->ack(array('foo' => 'bar'));
+        $ackResolver->ack(['foo' => 'bar']);
 
-        $this->assertEquals(array('foo' => 'bar'), $capturedHeaders);
+        $this->assertEquals(['foo' => 'bar'], $capturedHeaders);
         $this->assertEquals(54321, $capturedMsgId);
         $this->assertEquals(12345, $capturedSubId);
     }
@@ -65,24 +74,25 @@ class AckResolverTest extends TestCase
     {
         $client = $this->getMockBuilder('React\Stomp\Client')
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         $capturedSubId = $capturedMsgId = $capturedHeaders = null;
 
         $client
             ->expects($this->exactly(1))
             ->method('nack')
-            ->will($this->returnCallback(function ($subId, $msgId, $headers)
-                    use (&$capturedSubId, &$capturedMsgId, &$capturedHeaders) {
+            ->will($this->returnCallback(function ($subId, $msgId, $headers) use (&$capturedSubId, &$capturedMsgId, &$capturedHeaders) {
                 $capturedHeaders = $headers;
                 $capturedMsgId = $msgId;
                 $capturedSubId = $subId;
-            }));
+            }))
+        ;
 
         $ackResolver = new AckResolver($client, 12345, 54321);
-        $ackResolver->nack(array('foo' => 'bar'));
+        $ackResolver->nack(['foo' => 'bar']);
 
-        $this->assertEquals(array('foo' => 'bar'), $capturedHeaders);
+        $this->assertEquals(['foo' => 'bar'], $capturedHeaders);
         $this->assertEquals(54321, $capturedMsgId);
         $this->assertEquals(12345, $capturedSubId);
     }
